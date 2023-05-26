@@ -19,15 +19,21 @@ def menuVendedor():
 
     if acao == 1:
        inserirVendedor()
+       print(f'\n Vendedor cadastrado com sucesso!')
     elif acao == 2:
         visualizarVendedores()
     elif acao == 3:
         email = input("Digite o email do vendedor que deseja visualizar: ")
         visualizarVendedor(email)
     elif  acao == 4:
-        atualizarVendedor()
+        visualizarVendedores()
+        email = input("Digite o email do vendedor que deseja atualizar: ")
+        atualizarVendedor(email)
+        print(f'\n Vendedor atualizado com sucesso!')
     elif  acao == 5:
-        deletarVendedor()
+        email = input("Digite o email do vendedor que deseja deletar: ")
+        deletarVendedor(email)
+        print(f'\n Vendedor deletado com sucesso!')
     
     if acao != 0:
         menuVendedor()
@@ -38,11 +44,10 @@ def inserirVendedor():
     nome = input("Digite o nome completo do vendedor: ")
     email = input("Digite o email: ")
     cpf = input("Digite o cpf: ")
-    mydict = {"nome": nome, "email": email, "cpf": cpf}
+    mydict = {"nome_vendedor": nome, "email": email, "cpf": cpf}
     mycol = mydb.vendedor
     x = mycol.insert_one(mydict)
     print(x.inserted_id)
-    print(f'\n Vendedor cadastrado com sucesso!')
 
 
 def visualizarVendedores():
@@ -59,18 +64,14 @@ def visualizarVendedor(email):
     print(mycol.find_one(myquery))
 
 
-def atualizarVendedor():
+def atualizarVendedor(email):
     global mydb
-    email = input("Digite o email cadastrado do vendedor que deseja atualizar: ")
-    myquery = visualizarVendedor(email)
     mycol = mydb.vendedor
-    novoNome = input("Digite o novo nome do vendedor")
+    novoNome = input("\nDigite o novo nome do vendedor")
     novoEmail = input("Digite o novo email: ")
     novoCpf = input("Digite o novo CPF: ")
-    newvalues = { "$set": { "nome": novoNome}, "$set": { "email": novoEmail },
-                  "$set": { "Cpf": novoCpf }}
-    print(mycol.update_one(myquery, newvalues))
-    print(f'\n Vendedor atualizado com sucesso!')
+    novosValores = { "nome_vendedor": novoNome, "email": novoEmail, "cpf": novoCpf }
+    print(mycol.update_one({"email": email}, { "$set": novosValores}))
 
 
 def deletarVendedor(email):
@@ -78,4 +79,4 @@ def deletarVendedor(email):
     mycol = mydb.vendedor
     myquery = { "email": email }
     print(mycol.delete_one(myquery))
-    print(f'\n Vendedor deletdo com sucesso!')
+    

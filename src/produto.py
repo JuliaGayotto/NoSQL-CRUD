@@ -18,16 +18,22 @@ def menuProduto():
         acao = int(input("Digite o número de uma ação válida: "))
 
     if acao == 1:
-       inserirProduto()
+        inserirProduto()
+        print(f'\nProduto cadastrado com sucesso!')
     elif acao == 2:
         visualizarProdutos()
     elif acao == 3:
         nome = input("Digite o nome do produto que deseja visualizar: ")
         visualizarProduto(nome)
     elif  acao == 4:
-        atualizarProduto()
+        visualizarProdutos()
+        nome = input("Digite o nome do produto que deseja atualizar: ")
+        atualizarProduto(nome)
+        print(f'\nProduto atualizado com sucesso!')
     elif  acao == 5:
-        deletarProduto()        
+        nome = input("Digite o nome do produto que deseja deletar: ")
+        deletarProduto(nome) 
+        print(f'\nProduto deletdo com sucesso!')       
 
     if acao != 0:
         menuProduto()
@@ -42,7 +48,6 @@ def inserirProduto():
     mycol = mydb.produto
     x = mycol.insert_one(mydict)
     print(x.inserted_id)
-    print(f'\n Produto cadastrado com sucesso!')
 
 
 def visualizarProdutos():
@@ -57,20 +62,17 @@ def visualizarProduto(nome):
     mycol = mydb.produto
     myquery = { "nome": nome }
     print(mycol.find_one(myquery))
+    return mycol.find_one(myquery)
 
 
-def atualizarProduto():
+def atualizarProduto(nome):
     global mydb
-    nome = input("Digite o nome do produto cadastrado que deseja atualizar: ")
-    myquery = visualizarProduto(nome)
     mycol = mydb.produto
     novoNome = input("Digite o novo nome do produto: ")
-    novoPreco = float(input("Digite o novo preço do produto: "))
+    novoPreco = float(input("Digite o novo preço do produto (XX.XX): R$"))
     novaQuantidade = int(input("Digite a nova quantidade: "))
-    newvalues = { "$set": { "nome": novoNome}, "$set": { "preco": novoPreco },
-                  "$set": { "quant_produto": novaQuantidade }}
-    print(mycol.update_one(myquery, newvalues))
-    print(f'\n Produto atualizado com sucesso!')
+    novosValores = { "nome": novoNome, "preco": novoPreco, "quant_produto": novaQuantidade }
+    print(mycol.update_one({"nome": nome}, { "$set": novosValores}))
 
 
 def deletarProduto(nome):
@@ -78,4 +80,3 @@ def deletarProduto(nome):
     mycol = mydb.produto
     myquery = { "nome": nome }
     print(mycol.delete_one(myquery))
-    print(f'\n Produto deletdo com sucesso!')

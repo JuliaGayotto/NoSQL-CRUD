@@ -22,7 +22,6 @@ def menuPrincipal():
     if colecao != 0:
         menuPrincipal()
 
-menuPrincipal()
-    
 
-#https://www.w3schools.com/python/python_mongodb_find.asp
+###############
+menuPrincipal()
