@@ -9,7 +9,7 @@ global mydb
 mydb = client.mercadoLivre
 
 def menuProduto():
-    print("\n Produto")
+    print("\nPRODUTOS")
     print("Escolha uma ação \n")
     print(" 1 - Adicionar produto \n 2 - Visualizar todos produtos \n 3 - Visualizar produto \n 4 - Atualizar produto \n 5 - Deletar produto \n 0 - Voltar ao menu \n")
     acao = int(input("Escolha uma acao: "))
@@ -18,50 +18,61 @@ def menuProduto():
         acao = int(input("Digite o número de uma ação válida: "))
 
     if acao == 1:
+        print("\nCADASTRO")
         inserirProduto()
         print(f'\nProduto cadastrado com sucesso!')
     elif acao == 2:
-        visualizarProdutos()
+        print("\nPRODUTOS")
+        produtos = visualizarProdutos()
+        for produto in produtos:
+            print(f"\nNome: {produto.get('nome')} \nPreço: {produto.get('preco')} \nQuantidade: {produto.get('quant_produto')}")
     elif acao == 3:
         nome = input("Digite o nome do produto que deseja visualizar: ")
-        visualizarProduto(nome)
+        produto = visualizarProduto(nome)
+        print("\nPRODUTO ESCOLHIDO")
+        print(f"\nNome: {produto.get('nome')} \nPreço: {produto.get('preco')} \nQuantidade: {produto.get('quant_produto')}")
     elif  acao == 4:
-        visualizarProdutos()
-        nome = input("Digite o nome do produto que deseja atualizar: ")
+        print("\nATUALIZAR \nPRODUTOS:")
+        listarNomesProdutos()
+        nome = input("\nDigite o nome do produto que deseja atualizar: ")
         atualizarProduto(nome)
         print(f'\nProduto atualizado com sucesso!')
     elif  acao == 5:
+        print("\nDELETAR")
         nome = input("Digite o nome do produto que deseja deletar: ")
         deletarProduto(nome) 
-        print(f'\nProduto deletdo com sucesso!')       
+        print(f'\nProduto deletado com sucesso!')       
 
     if acao != 0:
         menuProduto()
 
 
+def listarNomesProdutos():
+    produtos = visualizarProdutos()
+    for produto in produtos:
+        print(produto.get('nome'))
+
+
 def inserirProduto():
     global mydb
     nome = input("Digite o nome do produto: ")
-    preco = float(input("Digite o preço: "))
+    preco = float(input("Digite o preço (XX.XX): R$: "))
     quant_produto = int(input("Digite a quantidade do produto: "))
     mydict = {"nome": nome, "preco": preco, "quant_produto": quant_produto}
     mycol = mydb.produto
-    x = mycol.insert_one(mydict)
-    print(x.inserted_id)
+    return mycol.insert_one(mydict)
 
 
 def visualizarProdutos():
     global mydb
     mycol = mydb.produto
-    for x in mycol.find():
-        print(x)
+    return mycol.find()
 
 
 def visualizarProduto(nome):
     global mydb
     mycol = mydb.produto
     myquery = { "nome": nome }
-    print(mycol.find_one(myquery))
     return mycol.find_one(myquery)
 
 
@@ -72,11 +83,11 @@ def atualizarProduto(nome):
     novoPreco = float(input("Digite o novo preço do produto (XX.XX): R$"))
     novaQuantidade = int(input("Digite a nova quantidade: "))
     novosValores = { "nome": novoNome, "preco": novoPreco, "quant_produto": novaQuantidade }
-    print(mycol.update_one({"nome": nome}, { "$set": novosValores}))
+    return mycol.update_one({"nome": nome}, { "$set": novosValores})
 
 
 def deletarProduto(nome):
     global mydb
     mycol = mydb.produto
     myquery = { "nome": nome }
-    print(mycol.delete_one(myquery))
+    return mycol.delete_one(myquery)
