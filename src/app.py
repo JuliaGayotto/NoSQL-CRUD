@@ -4,7 +4,7 @@ from compra import menuCompra
 from vendedor import menuVendedor
 
 def menuPrincipal():
-    print("\n COLEÇÕES: \n 1 - Usuários \n 2 - Produto \n 3 - Compra \n 4 - Vendedor \n 0 - Sair \n")
+    print("\n COLEÇÕES: \n 1 - Usuários \n 2 - Produtos \n 3 - Compras \n 4 - Vendedores \n 0 - Sair \n")
     colecao = int(input("Escolha uma colecao: "))
     opcoes = [0,1,2,3,4]
     while colecao not in opcoes:

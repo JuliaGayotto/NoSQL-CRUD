@@ -22,7 +22,7 @@ def menuVendedor():
         inserirVendedor()
         print(f'\nVendedor cadastrado com sucesso!')
     elif acao == 2:
-        print("\nVENDEDOR")
+        print("\nVENDEDORES")
         vendedores = visualizarVendedores()
         for vendedor in vendedores:
             print(f"\nNome_vendedor: {vendedor.get('nome')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")

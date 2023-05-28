@@ -9,7 +9,7 @@ global mydb
 mydb = client.mercadoLivre
 
 def menuUsuario():
-    print("\n\nUsuários")
+    print("\n\nUSUÁRIOS")
     print("Escolha uma ação: \n")
     print(" 1 - Adicionar usuário \n 2 - Visualizar todos usuários \n 3 - Visualizar usuário \n 4 - Atualizar usuário \n 5 - Adicionar favoritos \n 6 - Deletar usuário \n 0 - Voltar ao menu \n")
     acao = int(input("Escolha uma acao: "))
