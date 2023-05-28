@@ -9,7 +9,7 @@ global mydb
 mydb = client.mercadoLivre
 
 def menuVendedor():
-    print("\n VENDEDORES")
+    print("\nVENDEDORES")
     print("Escolha uma ação \n")
     print(" 1 - Adicionar vendedor \n 2 - Visualizar todos vendedores \n 3 - Visualizar vendedor \n 4 - Atualizar vendedor \n 5 - Deletar vendedor \n 0 - Voltar ao menu \n")
     acao = int(input("Escolha uma acao: "))
@@ -25,23 +25,27 @@ def menuVendedor():
         print("\nVENDEDORES")
         vendedores = visualizarVendedores()
         for vendedor in vendedores:
-            print(f"\nNome_vendedor: {vendedor.get('nome')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
+            print(f"\nNome_vendedor: {vendedor.get('nome_vendedor')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
     elif acao == 3:
-        email = input("Digite o email do vendedor que deseja visualizar: ")
-        visualizarVendedor(email)
+        print("\nEMAILS VENDEDORES:")
+        listarEmailsVendedores()
+        email = input("\nDigite o email do vendedor que deseja visualizar: ")
+        vendedor = visualizarVendedor(email)
         print("\nVENDEDOR ESCOLHIDO")
-        print(f"\nNome_vendedor: {vendedor.get('nome')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
+        print(f"\nNome_vendedor: {vendedor.get('nome_vendedor')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
     elif acao == 4:
-        print("\nATUALIZAR \nVENDEDORES:")
+        print("\nATUALIZAR \nEMAILS VENDEDORES:")
         listarEmailsVendedores()
         email = input("Digite o email do vendedor que deseja atualizar: ")
         atualizarVendedor(email)
-        print('\n Vendedor atualizado com sucesso!')
+        print('\nVendedor atualizado com sucesso!')
     elif  acao == 5:
         print("\nDELETAR")
-        email = input("Digite o email do vendedor que deseja deletar: ")
+        print("EMAILS VENDEDORES:")
+        listarEmailsVendedores()
+        email = input("\nDigite o email do vendedor que deseja deletar: ")
         deletarVendedor(email)
-        print(f'\n Vendedor deletado com sucesso!')
+        print(f'\nVendedor deletado com sucesso!')
     
     if acao != 0:
         menuVendedor()
@@ -79,7 +83,7 @@ def visualizarVendedor(email):
 def atualizarVendedor(email):
     global mydb
     mycol = mydb.vendedor
-    novoNome = input("\nDigite o novo nome do vendedor")
+    novoNome = input("\nDigite o novo nome do vendedor: ")
     novoEmail = input("Digite o novo email: ")
     novoCpf = input("Digite o novo CPF: ")
     novosValores = { "nome_vendedor": novoNome, "email": novoEmail, "cpf": novoCpf }

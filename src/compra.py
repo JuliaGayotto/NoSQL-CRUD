@@ -1,7 +1,7 @@
 from bson import ObjectId
-from usuario import visualizarUsuario
-from produto import visualizarProduto
-from vendedor import visualizarVendedor
+from usuario import visualizarUsuario, listarEmailsUsuarios
+from produto import visualizarProduto, listarNomesProdutos
+from vendedor import visualizarVendedor, listarEmailsVendedores
 import pymongo
 from pymongo.server_api import ServerApi
 
@@ -38,7 +38,7 @@ def menuCompra():
         print("\nDELETAR")
         id = input("Digite o id da compra que deseja deletar: ")
         deletarCompra(id)
-        print(f'\nProduto deletado com sucesso!')
+        print(f'\nCompra deletada com sucesso!')
         
     if acao != 0:
         menuCompra()
@@ -61,19 +61,28 @@ def inserirCompra():
     dataCompra = input("Digite a data da compra: ")
     produtos = []
     desejo  = 'S'
+    print("PRODUTOS")
+    listarNomesProdutos()
+
     while desejo != "N":
         nomeProduto = input("Digite o nome do produto: ")
         quant = int(input("Digite a quantidade comprada: "))
         prod = visualizarProduto(nomeProduto)
-        produto = {"nome": prod.get('nome'), "preco": prod.get('preco'), "quant_comprada": quant }
+        produto = {"id": prod.get('_id'), "nome": prod.get('nome'), "preco": prod.get('preco'), "quant_comprada": quant }
         produtos.append(produto)
         desejo = input("Deseja adicionar outro produto à compra? S/N ")
+
+    print("EMAILS VENDEDORES:")
+    listarEmailsVendedores()
     emailVendedor = input("Digite o email do vendedor: ")
     vend = visualizarVendedor(emailVendedor)
-    vendedor = {"nome_vendedor": vend.get('nome_vendedor'), "email": vend.get('email'), "cpf": vend.get('cpf')}
+    vendedor = {"id": vend.get('_id'), "nome_vendedor": vend.get('nome_vendedor'), "email": vend.get('email'), "cpf": vend.get('cpf')}
+    print("EMAIL USUÁRIOS:")
+    listarEmailsUsuarios()  
     emailUsuario = input("Digite o email do usuario: ")
     usu = visualizarUsuario(emailUsuario)
-    usuario = {"nome": usu.get('nome'), "email": usu.get('email'), "cpf": usu.get('cpf')}
+    usuario = {"id": usu.get('_id'), "nome": usu.get('nome'), "email": usu.get('email'), "cpf": usu.get('cpf')}
+
     mydict = {"data_compra": dataCompra, "usuario": usuario, "produtos": produtos, "vendedor": vendedor}
     mycol = mydb.compra
     return mycol.insert_one(mydict)

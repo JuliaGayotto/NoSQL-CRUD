@@ -27,7 +27,9 @@ def menuProduto():
         for produto in produtos:
             print(f"\nNome: {produto.get('nome')} \nPreço: {produto.get('preco')} \nQuantidade: {produto.get('quant_produto')}")
     elif acao == 3:
-        nome = input("Digite o nome do produto que deseja visualizar: ")
+        print("\nPRODUTOS:")
+        listarNomesProdutos()
+        nome = input("\nDigite o nome do produto que deseja visualizar: ")
         produto = visualizarProduto(nome)
         print("\nPRODUTO ESCOLHIDO")
         print(f"\nNome: {produto.get('nome')} \nPreço: {produto.get('preco')} \nQuantidade: {produto.get('quant_produto')}")
@@ -39,7 +41,9 @@ def menuProduto():
         print(f'\nProduto atualizado com sucesso!')
     elif  acao == 5:
         print("\nDELETAR")
-        nome = input("Digite o nome do produto que deseja deletar: ")
+        print("\nPRODUTOS:")
+        listarNomesProdutos()
+        nome = input("\nDigite o nome do produto que deseja deletar: ")
         deletarProduto(nome) 
         print(f'\nProduto deletado com sucesso!')       
 
@@ -56,7 +60,7 @@ def listarNomesProdutos():
 def inserirProduto():
     global mydb
     nome = input("Digite o nome do produto: ")
-    preco = float(input("Digite o preço (XX.XX): R$: "))
+    preco = float(input("Digite o preço (XX.XX): R$"))
     quant_produto = int(input("Digite a quantidade do produto: "))
     mydict = {"nome": nome, "preco": preco, "quant_produto": quant_produto}
     mycol = mydb.produto

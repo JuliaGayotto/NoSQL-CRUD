@@ -1,4 +1,5 @@
 from produto import visualizarProdutos, visualizarProduto, listarNomesProdutos
+from bson import ObjectId
 import pymongo
 from pymongo.server_api import ServerApi
 
@@ -27,25 +28,28 @@ def menuUsuario():
         for usuario in usuarios:
             selecionarUsuario(usuario)
     elif acao == 3:
-        email = input("Digite o email do usuario que deseja visualizar: ")
+        print("\nEMAIL USUÁRIOS:")
+        listarEmailsUsuarios()
+        email = input("\nDigite o email do usuario que deseja visualizar: ")
         usuario = visualizarUsuario(email)
         print("\nUSUÁRIO ESCOLHIDO", end='')
         selecionarUsuario(usuario)   
     elif  acao == 4:
-        print("\nATUALIZAR \nUSUÁRIOS:")
+        print("\nATUALIZAR \nEMAIL USUÁRIOS:")
         listarEmailsUsuarios()
         email = input("\nDigite o email cadastrado do usuario que deseja atualizar: ")
         atualizarUsuario(email)
         print('\nUsuário atualizado com sucesso!')
     elif  acao == 5:
-        print("\nADICIONAR FAVORITOS \nUSUÁRIOS:")
+        print("\nADICIONAR FAVORITOS \nEMAIL USUÁRIOS:")
         listarEmailsUsuarios()
         email = input("\nDigite o email do usuário em que se deseja adicionar favorito(s): ")
         adicionarFavoritos(email)
         print('\nFavorito adicionado com sucesso!')
     elif  acao == 6:
-        print("\nDELETAR")
-        email = input("Digite o email do vendedor que deseja deletar: ")
+        print("\nDELETAR \nEMAIL USUÁRIOS:")
+        listarEmailsUsuarios()
+        email = input("\nDigite o email do usuário que deseja deletar: ")
         deletarUsuario(email)
         print(f'\nUsuário deletado com sucesso!')
         
@@ -141,15 +145,15 @@ def atualizarUsuario(email):
 
 
 def adicionarFavoritos(email):
-    visualizarProdutos()
     favoritos = []
     desejo = "S"
     while (desejo != "N"):
+        print("PRODUTOS")
         listarNomesProdutos()
         favorito = input("Digite o nome do produto que deseja favoritar: ")
         produtoFavoritado = visualizarProduto(favorito)  
         print(produtoFavoritado)
-        favorito = {"nome_favorito": produtoFavoritado["nome"],"preco": produtoFavoritado["preco"]}
+        favorito = {"_id": ObjectId(), "nome_favorito": produtoFavoritado["nome"],"preco": produtoFavoritado["preco"]}
         favoritos.append(favorito)
         desejo = input("Deseja adicionar outro produto em favoritos? S/N ")
     novoValor = {"favoritos": favoritos}
