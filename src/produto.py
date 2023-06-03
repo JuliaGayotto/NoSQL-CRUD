@@ -83,10 +83,19 @@ def visualizarProduto(nome):
 def atualizarProduto(nome):
     global mydb
     mycol = mydb.produto
-    novoNome = input("Digite o novo nome do produto: ")
-    novoPreco = float(input("Digite o novo preço do produto (XX.XX): R$"))
-    novaQuantidade = int(input("Digite a nova quantidade: "))
-    novosValores = { "nome": novoNome, "preco": novoPreco, "quant_produto": novaQuantidade }
+    novosValores = {}
+    desejo = input("Deseja atualizar o nome? S/N ")
+    if desejo == "S":
+        novoNome = input("Digite o novo nome do produto: ")
+        novosValores["nome"] = novoNome
+    desejo = input("Deseja atualizar o preço? S/N ")
+    if desejo == "S":
+        novoPreco = float(input("Digite o novo preço do produto (XX.XX): R$"))
+        novosValores["preco"] = novoPreco
+    desejo = input("Deseja atualizar a quantidade em estoque? S/N ")
+    if desejo == "S":
+        novaQuantidade = int(input("Digite a nova quantidade: "))
+        novosValores["quant_produto"] = novaQuantidade
     return mycol.update_one({"nome": nome}, { "$set": novosValores})
 
 

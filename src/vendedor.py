@@ -83,10 +83,19 @@ def visualizarVendedor(email):
 def atualizarVendedor(email):
     global mydb
     mycol = mydb.vendedor
-    novoNome = input("\nDigite o novo nome do vendedor: ")
-    novoEmail = input("Digite o novo email: ")
-    novoCpf = input("Digite o novo CPF: ")
-    novosValores = { "nome_vendedor": novoNome, "email": novoEmail, "cpf": novoCpf }
+    novosValores = {}
+    desejo = input("Deseja atualizar o nome? S/N ")
+    if desejo == "S":
+        novoNome = input("\nDigite o novo nome do vendedor: ")
+        novosValores["nome_vendedor"] = novoNome
+    desejo = input("Deseja atualizar o email? S/N ")
+    if desejo == "S":
+        novoEmail = input("Digite o novo email: ")
+        novosValores["email"] = novoEmail
+    desejo = input("Deseja atualizar o CPF? S/N ")
+    if desejo == "S":
+        novoCpf = input("Digite o novo CPF: ")
+        novosValores["cpf"] = novoCpf
     return mycol.update_one({"email": email}, { "$set": novosValores})
 
 

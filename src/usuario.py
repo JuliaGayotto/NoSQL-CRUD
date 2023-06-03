@@ -61,12 +61,19 @@ def listarEmailsUsuarios():
     usuarios = visualizarUsuarios()
     for usuario in usuarios:
         print(usuario.get('email'))
-        
 
 def selecionarUsuario(usuario):
     print(f"\n\nNome: {usuario.get('nome')} \nEmail: {usuario.get('email')} \nCPF: {usuario.get('cpf')}", end='')       
     enderecos = usuario.get("enderecos")
-    for endereco in enderecos:
+    if len(enderecos) > 1:
+        for endereco in enderecos:
+            cep = endereco.get("cep")
+            numero = endereco.get("numero")
+            complemento = endereco.get("complemento")
+            print(f"\nENDEREÇO: \nCEP: {cep}  Número: {numero} ", end='')
+            if complemento != '':
+                print(f"Complemento: {complemento}", end='')
+    else:
         cep = endereco.get("cep")
         numero = endereco.get("numero")
         complemento = endereco.get("complemento")
@@ -74,7 +81,11 @@ def selecionarUsuario(usuario):
         if complemento != '':
             print(f"Complemento: {complemento}", end='')
     favoritos = usuario.get("favoritos")
-    if favoritos != None:
+    if favoritos > 1:
+        nome = favorito.get("nome_favorito")
+        preco = favorito.get("preco")
+        print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
+    elif favoritos == 1:
         for favorito in favoritos:
             nome = favorito.get("nome_favorito")
             preco = favorito.get("preco")
@@ -122,25 +133,37 @@ def visualizarUsuario(email):
 def atualizarUsuario(email):
     global mydb
     mycol = mydb.usuario
-    novoNome = input("Digite o novo nome do usuario: ")
-    novoEmail = input("Digite o novo email: ")
-    novoCpf = input("Digite o novo CPF: ")
+    novosValores = {}
+    desejo = input("Deseja atualizar o nome? S/N ")
+    if desejo == "S":
+        novoNome = input("\nDigite o novo nome do usuario: ")
+        novosValores["nome"] = novoNome
+    desejo = input("Deseja atualizar o email? S/N ")
+    if desejo == "S":
+        novoEmail = input("Digite o novo email: ")
+        novosValores["email"] = novoEmail
+    desejo = input("Deseja atualizar o CPF? S/N ")
+    if desejo == "S":
+        novoCpf = input("Digite o novo CPF: ")
+        novosValores["cpf"] = novoCpf
     novosEnderecos = []
     repetir = 'S'
     
-    while (repetir != "N"):
-        cep = input("Digite o CEP: ")
-        num = int(input("Digite o número: "))
-        desejo = input("Deseja alterar o complemento? S/N ")
-        if desejo == "S":
-            complemento = input("Digite o complemento: ")
-        else:
-            complemento = ''
-        end = {"cep": cep, "numero": num, "complemento": complemento}
-        novosEnderecos.append(end)
-        repetir = input("Digitar outro endereço (S/N)? ")
+    desejo = input("Deseja atualizar o endereço? S/N ")
+    if desejo == "S":
+        while (repetir != "N"):
+            cep = input("Digite o CEP: ")
+            num = int(input("Digite o número: "))
+            desejo = input("Possuí complemento? S/N ")
+            if desejo == "S":
+                complemento = input("Digite o complemento: ")
+            else:
+                complemento = ''
+            end = {"cep": cep, "numero": num, "complemento": complemento}
+            novosEnderecos.append(end)
+            repetir = input("Digitar outro endereço (S/N)? ")
+        novosValores["enderecos"] = end
 
-    novosValores = {"nome": novoNome, "email": novoEmail, "cpf": novoCpf, "enderecos" : novosEnderecos}
     return mycol.update_one({"email": email}, { "$set": novosValores})
 
 
@@ -152,7 +175,6 @@ def adicionarFavoritos(email):
         listarNomesProdutos()
         favorito = input("Digite o nome do produto que deseja favoritar: ")
         produtoFavoritado = visualizarProduto(favorito)  
-        print(produtoFavoritado)
         favorito = {"_id": ObjectId(), "nome_favorito": produtoFavoritado["nome"],"preco": produtoFavoritado["preco"]}
         favoritos.append(favorito)
         desejo = input("Deseja adicionar outro produto em favoritos? S/N ")
