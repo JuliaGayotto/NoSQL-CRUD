@@ -82,11 +82,11 @@ def selecionarUsuario(usuario):
             print(f"Complemento: {complemento}", end='')
     favoritos = usuario.get("favoritos")
     if favoritos > 1:
-        nome = favorito.get("nome_favorito")
-        preco = favorito.get("preco")
-        print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
-    elif favoritos == 1:
         for favorito in favoritos:
+            nome = favorito.get("nome_favorito")
+            preco = favorito.get("preco")
+            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
+    elif favoritos == 1:
             nome = favorito.get("nome_favorito")
             preco = favorito.get("preco")
             print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
