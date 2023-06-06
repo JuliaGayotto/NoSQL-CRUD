@@ -1,5 +1,6 @@
 import pymongo
 from pymongo.server_api import ServerApi
+from vendedor import visualizarVendedor, listarEmailsVendedores, adicionarProdutosVendedor
 
 client = pymongo.MongoClient("mongodb+srv://juliagayotto:permanganatodepotassio@banco.tltf4oc.mongodb.net/?retryWrites=true&w=majority", server_api=ServerApi('1'))
 
@@ -19,13 +20,15 @@ def menuProduto():
 
     if acao == 1:
         print("\nCADASTRO")
-        inserirProduto()
-        print(f'\nProduto cadastrado com sucesso!')
+        listarEmailsVendedores()
+        email = input("Digite o email do vendedor do produto que deseja cadastrar: ")
+        inserirProduto(email)
+        print(f'Produto cadastrado com sucesso!')
     elif acao == 2:
         print("\nPRODUTOS")
         produtos = visualizarProdutos()
         for produto in produtos:
-            print(f"\nNome: {produto.get('nome')} \nPreço: {produto.get('preco')} \nQuantidade: {produto.get('quant_produto')}")
+            print(f"\nNome: {produto.get('nome')} \nPreço: {produto.get('preco')} \nQuantidade: {produto.get('quant_produto')} \nVendedor: {produto.get('vendedor').get('nome_vendedor')}")
     elif acao == 3:
         print("\nPRODUTOS:")
         listarNomesProdutos()
@@ -57,12 +60,15 @@ def listarNomesProdutos():
         print(produto.get('nome'))
 
 
-def inserirProduto():
+def inserirProduto(email):
     global mydb
+    vend = visualizarVendedor(email)
+    vendedor = {"id": vend.get('_id'), "nome_vendedor": vend.get('nome_vendedor'), "email": vend.get('email'), "cpf": vend.get('cpf')}
     nome = input("Digite o nome do produto: ")
-    preco = float(input("Digite o preço (XX.XX): R$"))
+    preco = float(input("Digite o preço (XX.XX): R$ "))
     quant_produto = int(input("Digite a quantidade do produto: "))
-    mydict = {"nome": nome, "preco": preco, "quant_produto": quant_produto}
+    mydict = {"nome": nome, "preco": preco, "quant_produto": quant_produto, "vendedor": vendedor}
+    adicionarProdutosVendedor(email, mydict)
     mycol = mydb.produto
     return mycol.insert_one(mydict)
 

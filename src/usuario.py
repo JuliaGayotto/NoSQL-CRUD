@@ -45,7 +45,7 @@ def menuUsuario():
         listarEmailsUsuarios()
         email = input("\nDigite o email do usuário em que se deseja adicionar favorito(s): ")
         adicionarFavoritos(email)
-        print('\nFavorito adicionado com sucesso!')
+        print('Favorito adicionado com sucesso!')
     elif  acao == 6:
         print("\nDELETAR \nEMAIL USUÁRIOS:")
         listarEmailsUsuarios()
@@ -65,15 +65,7 @@ def listarEmailsUsuarios():
 def selecionarUsuario(usuario):
     print(f"\n\nNome: {usuario.get('nome')} \nEmail: {usuario.get('email')} \nCPF: {usuario.get('cpf')}", end='')       
     enderecos = usuario.get("enderecos")
-    if len(enderecos) > 1:
-        for endereco in enderecos:
-            cep = endereco.get("cep")
-            numero = endereco.get("numero")
-            complemento = endereco.get("complemento")
-            print(f"\nENDEREÇO: \nCEP: {cep}  Número: {numero} ", end='')
-            if complemento != '':
-                print(f"Complemento: {complemento}", end='')
-    else:
+    for endereco in enderecos:
         cep = endereco.get("cep")
         numero = endereco.get("numero")
         complemento = endereco.get("complemento")
@@ -81,15 +73,11 @@ def selecionarUsuario(usuario):
         if complemento != '':
             print(f"Complemento: {complemento}", end='')
     favoritos = usuario.get("favoritos")
-    if favoritos > 1:
+    if favoritos != None:
         for favorito in favoritos:
             nome = favorito.get("nome_favorito")
             preco = favorito.get("preco")
-            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
-    elif favoritos == 1:
-            nome = favorito.get("nome_favorito")
-            preco = favorito.get("preco")
-            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
+            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='') 
 
 
 def inserirUsuario():
@@ -146,9 +134,9 @@ def atualizarUsuario(email):
     if desejo == "S":
         novoCpf = input("Digite o novo CPF: ")
         novosValores["cpf"] = novoCpf
-    novosEnderecos = []
+    enderecos = []
     repetir = 'S'
-    
+      
     desejo = input("Deseja atualizar o endereço? S/N ")
     if desejo == "S":
         while (repetir != "N"):
@@ -160,15 +148,21 @@ def atualizarUsuario(email):
             else:
                 complemento = ''
             end = {"cep": cep, "numero": num, "complemento": complemento}
-            novosEnderecos.append(end)
+            enderecos.append(end)
             repetir = input("Digitar outro endereço (S/N)? ")
-        novosValores["enderecos"] = end
+        novosValores["enderecos"] = enderecos
 
     return mycol.update_one({"email": email}, { "$set": novosValores})
 
 
 def adicionarFavoritos(email):
     favoritos = []
+    usu = visualizarUsuario(email)
+    try:
+        for favorito in usu.getFavoritos:
+            favoritos.append(favorito)
+    except:
+        print()
     desejo = "S"
     while (desejo != "N"):
         print("PRODUTOS")
@@ -181,7 +175,6 @@ def adicionarFavoritos(email):
     novoValor = {"favoritos": favoritos}
     mycol = mydb.usuario
     return mycol.update_one({"email": email}, { "$set": novoValor})
-
 
 def deletarUsuario(email):
     global mydb

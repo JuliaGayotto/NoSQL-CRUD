@@ -25,14 +25,14 @@ def menuVendedor():
         print("\nVENDEDORES")
         vendedores = visualizarVendedores()
         for vendedor in vendedores:
-            print(f"\nNome_vendedor: {vendedor.get('nome_vendedor')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
+            print(f"\nNome: {vendedor.get('nome_vendedor')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
     elif acao == 3:
         print("\nEMAILS VENDEDORES:")
         listarEmailsVendedores()
         email = input("\nDigite o email do vendedor que deseja visualizar: ")
         vendedor = visualizarVendedor(email)
         print("\nVENDEDOR ESCOLHIDO")
-        print(f"\nNome_vendedor: {vendedor.get('nome_vendedor')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
+        print(f"\nNome: {vendedor.get('nome_vendedor')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
     elif acao == 4:
         print("\nATUALIZAR \nEMAILS VENDEDORES:")
         listarEmailsVendedores()
@@ -98,6 +98,23 @@ def atualizarVendedor(email):
         novosValores["cpf"] = novoCpf
     return mycol.update_one({"email": email}, { "$set": novosValores})
 
+
+def adicionarProdutosVendedor(email, mydict):
+    global mydb
+    mycol = mydb.vendedor
+    produtos = []
+    vend = visualizarVendedor(email)
+    try:
+        
+        for produto in vend.getProdutos:
+            produtos.append(produto)
+    except:
+        print()
+    produto = mydict
+    produtos.append(produto)
+    novosValores = {"produtos": produtos }
+    return mycol.update_one({"email": email}, { "$set": novosValores})
+    
 
 def deletarVendedor(email):
     global mydb
