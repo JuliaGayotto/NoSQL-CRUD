@@ -46,9 +46,13 @@ def atualizarEmailUsuario():
     mycol = mydb.usuario
     myquery = {"nome": nome}
     usuario = mycol.find_one(myquery)
+    print(usuario)
+
     emailAntigo = visualizarUsuario(usuario.get('email')).get('email')
     email = input(f"\nDigite o novo email de {nome}: ")
     dbRedis.hset('usuario:' + nome, 'email', email)
+    print(dbRedis.hget("usuario:" + nome, 'email'))
+    
     mycol.update_one({"nome": nome}, {"$set": {
         "email": json.loads(dbRedis.hget("usuario:" + nome, 'email')),
     }}, upsert=True)
