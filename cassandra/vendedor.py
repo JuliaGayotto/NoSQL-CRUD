@@ -79,6 +79,7 @@ def visualizarVendedores():
     vendedores = []
     for row in result:
         vendedor = {
+            'id': row.id,
             'nome_vendedor': row.nome_vendedor,
             'email': row.email,
             'cpf': row.cpf
@@ -92,6 +93,7 @@ def visualizarVendedor(email):
     result = session.execute(query)
     for row in result:
         vendedor = {
+            'id': row.id,
             'nome_vendedor': row.nome_vendedor,
             'email': row.email,
             'cpf': row.cpf
@@ -116,17 +118,6 @@ def atualizarVendedor(email):
     if desejo == "S":
         novoCpf = input("Digite o novo CPF: ")
         session.execute("UPDATE vendedor SET cpf = %s WHERE id = %s", (novoCpf, vendedor_id))
-
-
-def adicionarProdutosVendedor(email, mydict):
-    query = f"SELECT produtos FROM vendedor WHERE email = '{email}'"
-    result = session.execute(query)
-    produtos = []
-    for row in result:
-        produtos = row.produtos
-    produtos.append(mydict)
-    query = f"UPDATE vendedor SET produtos = {produtos} WHERE email = '{email}'"
-    session.execute(query)
 
 
 def deletarVendedor(email):

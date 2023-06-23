@@ -1,6 +1,6 @@
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
-from vendedor import visualizarVendedor, listarEmailsVendedores, adicionarProdutosVendedor
+from vendedor import visualizarVendedor, listarEmailsVendedores
 from cassandra.util import uuid
 
 cloud_config= {
@@ -35,14 +35,14 @@ def menuProduto():
         print("\nPRODUTOS")
         produtos = visualizarProdutos()
         for produto in produtos:
-            print(f"\nNome: {produto['nome']} \nPreço: {produto['preco']} \nQuantidade: {produto['quant_produto']} \nVendedor: {produto['vendedor']['nome_vendedor']}")
+            print(f"\nNome: {produto.nome} \nPreço: {round(produto.preco, 2)} \nQuantidade: {produto.quantidade} \nVendedor: {produto.vendedor.get('nome_vendedor')}")
     elif acao == 3:
         print("\nPRODUTOS:")
         listarNomesProdutos()
         nome = input("\nDigite o nome do produto que deseja visualizar: ")
         produto = visualizarProduto(nome)
         print("\nPRODUTO ESCOLHIDO")
-        print(f"\nNome: {produto['nome']} \nPreço: {produto['preco']} \nQuantidade: {produto['quant_produto']}")
+        print(f"\nNome: {produto.nome} \nPreço: {round(produto.preco, 2)} \nQuantidade: {produto.quantidade} \nVendedor: {produto.vendedor.get('nome_vendedor')}")
     elif  acao == 4:
         print("\nATUALIZAR \nPRODUTOS:")
         listarNomesProdutos()
@@ -66,42 +66,51 @@ def listarNomesProdutos():
     for row in result:
         print(row.nome)
 
+
 def inserirProduto(email):
     vend = visualizarVendedor(email)
-    print(vend)
-    vendedor = {"id": vend.id, "nome_vendedor": vend.nome_vendedor, "email": vend.email, "cpf": vend.cpf}
+    vendedor = {"id":  str(vend['id']), "nome_vendedor": vend['nome_vendedor'], "email": vend['email'], "cpf": vend['cpf']}
     nome = input("Digite o nome do produto: ")
     preco = float(input("Digite o preço (XX.XX): R$ "))
-    quant_produto = int(input("Digite a quantidade do produto: "))
-    query = f"INSERT INTO produto (nome, preco, quant_produto, vendedor) VALUES ('{nome}', {preco}, {quant_produto}, {vendedor})"
+    quantidade = int(input("Digite a quantidade do produto: "))
+    query = f"INSERT INTO produto (id, nome, preco, quantidade, vendedor) VALUES ({uuid.uuid4()}, '{nome}', {preco}, {quantidade}, {vendedor})"
     session.execute(query)
+
 
 def visualizarProdutos():
     rows = session.execute("SELECT * FROM produto")
     return rows
 
+
 def visualizarProduto(nome):
-    query = f"SELECT * FROM produto WHERE nome = '{nome}'"
+    query = f"SELECT * FROM produto WHERE nome = '{nome}' ALLOW FILTERING"
     rows = session.execute(query)
     return rows.one()
 
+
 def atualizarProduto(nome):
+    query_busca_id = f"SELECT id FROM produto WHERE nome = '{nome}'  ALLOW FILTERING"
+    result = session.execute(query_busca_id)
+    produto_id = result.one()[0] 
     novosValores = {}
     desejo = input("Deseja atualizar o nome? S/N ")
     if desejo == "S":
         novoNome = input("Digite o novo nome do produto: ")
-        novosValores["nome"] = novoNome
-        desejo = input("Deseja atualizar o preço? S/N ")
+        session.execute("UPDATE produto SET nome = %s WHERE id = %s", (novoNome, produto_id))
+    desejo = input("Deseja atualizar o preço? S/N ")
     if desejo == "S":
         novoPreco = float(input("Digite o novo preço do produto (XX.XX): R$"))
-        novosValores["preco"] = novoPreco
-        desejo = input("Deseja atualizar a quantidade em estoque? S/N ")
+        session.execute("UPDATE produto SET preco = %s WHERE id = %s", (novoPreco, produto_id))
+    desejo = input("Deseja atualizar a quantidade em estoque? S/N ")
     if desejo == "S":
         novaQuantidade = int(input("Digite a nova quantidade: "))
-        novosValores["quantidade"] = novaQuantidade
-    query = f"UPDATE produto SET {', '.join([f'{key} = {value}' for key, value in novosValores.items()])} WHERE nome = '{nome}'"
-    session.execute(query)
+        session.execute("UPDATE produto SET quantidade = %s WHERE id = %s", (novaQuantidade, produto_id))
+      
 
 def deletarProduto(nome):
-    query = f"DELETE FROM produto WHERE nome = '{nome}'"
-    session.execute(query)
+    query_busca_id = f"SELECT id FROM produto WHERE nome = '{nome}'  ALLOW FILTERING"
+    result = session.execute(query_busca_id)
+    produto_id = result.one()[0]  
+    query_exclusao = f"DELETE FROM produto WHERE id = {produto_id}"
+    session.execute(query_exclusao)
+    
