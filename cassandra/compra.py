@@ -6,17 +6,17 @@ from cassandra.auth import PlainTextAuthProvider
 from cassandra.util import uuid
 
 cloud_config= {
-  'secure_connect_bundle': '<</PATH/TO/>>secure-connect-mercadolivre.zip'
+  'secure_connect_bundle': 'secure-connect-mercadolivre.zip'
 }
-auth_provider = PlainTextAuthProvider('<<CLIENT ID>>', '<<CLIENT SECRET>>')
+auth_provider = PlainTextAuthProvider('ZEvbLFgKJKANTefcrHGzHDeL', ',fTfqW4l9U,KvmUG_a2X7wWruzwb58GYYadc-g36AAcvpH50Dvzc0QwxlM5MDMUwZmiR5CB5CpebL8BrTRta9XZTddUbp69pnDKwYUzG+ZgcZNOY2kZB8SllW4w7OBG6')
 cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
 session = cluster.connect('mercadolivre')
 
 row = session.execute("select release_version from system.local").one()
 if row:
-  print(row[0])
+  print(".")
 else:
-  print("An error occurred.")
+  print("Ocorreu um erro")
 
 def menuCompra():
     print("\nCOMPRAS")

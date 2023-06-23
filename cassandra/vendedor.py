@@ -3,17 +3,17 @@ from cassandra.auth import PlainTextAuthProvider
 from cassandra.util import uuid
 
 cloud_config= {
-  'secure_connect_bundle': '<</PATH/TO/>>secure-connect-mercadolivre.zip'
+  'secure_connect_bundle': 'secure-connect-mercadolivre.zip'
 }
-auth_provider = PlainTextAuthProvider('<<CLIENT ID>>', '<<CLIENT SECRET>>')
+auth_provider = PlainTextAuthProvider('ZEvbLFgKJKANTefcrHGzHDeL', ',fTfqW4l9U,KvmUG_a2X7wWruzwb58GYYadc-g36AAcvpH50Dvzc0QwxlM5MDMUwZmiR5CB5CpebL8BrTRta9XZTddUbp69pnDKwYUzG+ZgcZNOY2kZB8SllW4w7OBG6')
 cluster = Cluster(cloud=cloud_config, auth_provider=auth_provider)
 session = cluster.connect('mercadolivre')
 
 row = session.execute("select release_version from system.local").one()
 if row:
-  print(row[0])
+  print("Conectando com o banco de dados")
 else:
-  print("An error occurred.")
+  print("Ocorreu um erro")
 
 def menuVendedor():
     print("\nVENDEDORES")
@@ -69,7 +69,7 @@ def inserirVendedor():
     nome = input("Digite o nome completo do vendedor: ")
     email = input("Digite o email: ")
     cpf = input("Digite o CPF: ")
-    query = f"INSERT INTO vendedor (nome_vendedor, email, cpf) VALUES ('{nome}', '{email}', '{cpf}')"
+    query = f"INSERT INTO vendedor (id, nome_vendedor, email, cpf) VALUES ({uuid.uuid4()}, '{nome}', '{email}', '{cpf}')"
     session.execute(query)
 
 
@@ -88,7 +88,7 @@ def visualizarVendedores():
 
 
 def visualizarVendedor(email):
-    query = f"SELECT * FROM vendedor WHERE email = '{email}'"
+    query = f"SELECT * FROM vendedor WHERE email = '{email}' ALLOW FILTERING"
     result = session.execute(query)
     for row in result:
         vendedor = {
@@ -100,21 +100,22 @@ def visualizarVendedor(email):
 
 
 def atualizarVendedor(email):
+    query_busca_id = f"SELECT id FROM vendedor WHERE email = '{email}'  ALLOW FILTERING"
+    result = session.execute(query_busca_id)
+    vendedor_id = result.one()[0]  
     novosValores = {}
     desejo = input("Deseja atualizar o nome? S/N ")
     if desejo == "S":
         novoNome = input("\nDigite o novo nome do vendedor: ")
-        novosValores["nome_vendedor"] = novoNome
+        session.execute("UPDATE vendedor SET nome_vendedor = %s WHERE id = %s", (novoNome, vendedor_id))
     desejo = input("Deseja atualizar o email? S/N ")
     if desejo == "S":
         novoEmail = input("Digite o novo email: ")
-        novosValores["email"] = novoEmail
+        session.execute("UPDATE vendedor SET email = %s WHERE id = %s", (novoEmail, vendedor_id))
     desejo = input("Deseja atualizar o CPF? S/N ")
     if desejo == "S":
         novoCpf = input("Digite o novo CPF: ")
-        novosValores["cpf"] = novoCpf
-    query = f"UPDATE vendedor SET {', '.join([f'{col} = {val}' for col, val in novosValores.items()])} WHERE email = '{email}'"
-    session.execute(query)
+        session.execute("UPDATE vendedor SET cpf = %s WHERE id = %s", (novoCpf, vendedor_id))
 
 
 def adicionarProdutosVendedor(email, mydict):
@@ -129,6 +130,9 @@ def adicionarProdutosVendedor(email, mydict):
 
 
 def deletarVendedor(email):
-    query = f"DELETE FROM vendedor WHERE email = '{email}'"
-    session.execute(query)
+    query_busca_id = f"SELECT id FROM vendedor WHERE email = '{email}'  ALLOW FILTERING"
+    result = session.execute(query_busca_id)
+    vendedor_id = result.one()[0]  
+    query_exclusao = f"DELETE FROM vendedor WHERE id = {vendedor_id}"
+    session.execute(query_exclusao)
 
