@@ -101,10 +101,10 @@ def visualizarCompras():
     return rows
 
 def visualizarCompra(id):
-    query = f"SELECT * FROM compra WHERE id = {id}"
+    query = f"SELECT * FROM compra WHERE id = {id} ALLOW FILTERING"
     rows = session.execute(query)
     return rows.one()
 
 def deletarCompra(id):
-    query = f"DELETE FROM compra WHERE id = {id}"
+    query = f"DELETE FROM compra WHERE id = {id} ALLOW FILTERING"
     session.execute(query)

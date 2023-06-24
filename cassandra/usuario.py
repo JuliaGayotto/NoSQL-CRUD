@@ -71,8 +71,8 @@ def listarEmailsUsuarios():
 
 
 def selecionarUsuario(usuario):
-    print(f"\n\nNome: {usuario['nome']} \nEmail: {usuario['email']} \nCPF: {usuario['cpf']}", end='')       
-    enderecos = usuario['enderecos']
+    print(f"\n\nNome: {usuario.nome} \nEmail: {usuario.email} \nCPF: {usuario.cpf}", end='')       
+    enderecos = usuario.enderecos
     for endereco in enderecos:
         cep = endereco['cep']
         numero = endereco['numero']
@@ -80,12 +80,13 @@ def selecionarUsuario(usuario):
         print(f"\nENDEREÇO: \nCEP: {cep}  Número: {numero} ", end='')
         if complemento:
             print(f"Complemento: {complemento}", end='')
-    favoritos = usuario.get('favoritos')
+    favoritos = usuario.favoritos
     if favoritos:
         for favorito in favoritos:
             nome = favorito['nome_favorito']
             preco = favorito['preco']
-            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
+            preco_arredondado = "{:.2f}".format(round(float(preco), 2))
+            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco_arredondado}", end='')
 
 def inserirUsuario():
     nome = input("Digite o nome completo do usuário: ")
@@ -96,7 +97,7 @@ def inserirUsuario():
 
     while repetir != "N":
         cep = input("Digite o CEP: ")
-        num = int(input("Digite o número: "))
+        num = input("Digite o número: ")
         desejo = input("Deseja adicionar um complemento? S/N ")
         if desejo == "S":
             complemento = input("Digite o complemento: ")
@@ -106,7 +107,7 @@ def inserirUsuario():
         enderecos.append(end)
         repetir = input("Digitar outro endereço (S/N)? ")
 
-    query = f"INSERT INTO usuario (nome, email, cpf, enderecos) VALUES ('{nome}', '{email}', '{cpf}', {enderecos})"
+    query = f"INSERT INTO usuario (id, nome, email, cpf, enderecos) VALUES ({uuid.uuid4()}, '{nome}', '{email}', '{cpf}', {enderecos})"
     session.execute(query)
 
 def visualizarUsuarios():
@@ -115,33 +116,37 @@ def visualizarUsuarios():
     return result
 
 def visualizarUsuario(email):
-    query = f"SELECT * FROM usuario WHERE email = '{email}'"
+    query = f"SELECT * FROM usuario WHERE email = '{email}' ALLOW FILTERING"
     result = session.execute(query)
     return result.one()
 
 
 def atualizarUsuario(email):
+    query_busca_id = f"SELECT id FROM usuario WHERE email = '{email}'  ALLOW FILTERING"
+    result = session.execute(query_busca_id)
+    usuario_id = result.one()[0] 
+
     novosValores = {}
     desejo = input("Deseja atualizar o nome? S/N ")
     if desejo == "S":
         novoNome = input("\nDigite o novo nome do usuário: ")
-        novosValores["nome"] = novoNome
+        session.execute("UPDATE usuario SET nome = %s WHERE id = %s", (novoNome, usuario_id))
     desejo = input("Deseja atualizar o email? S/N ")
     if desejo == "S":
         novoEmail = input("Digite o novo email: ")
-        novosValores["email"] = novoEmail
+        session.execute("UPDATE usuario SET email = %s WHERE id = %s", (novoEmail, usuario_id))
     desejo = input("Deseja atualizar o CPF? S/N ")
     if desejo == "S":
         novoCpf = input("Digite o novo CPF: ")
-        novosValores["cpf"] = novoCpf
+        session.execute("UPDATE usuario SET cpf = %s WHERE id = %s", (novoCpf, usuario_id))
+
     enderecos = []
     repetir = 'S'
-      
     desejo = input("Deseja atualizar o endereço? S/N ")
     if desejo == "S":
         while repetir != "N":
             cep = input("Digite o CEP: ")
-            num = int(input("Digite o número: "))
+            num = input("Digite o número: ")
             desejo = input("Possui complemento? S/N ")
             if desejo == "S":
                 complemento = input("Digite o complemento: ")
@@ -150,12 +155,13 @@ def atualizarUsuario(email):
             end = {"cep": cep, "numero": num, "complemento": complemento}
             enderecos.append(end)
             repetir = input("Digitar outro endereço (S/N)? ")
-        novosValores["enderecos"] = enderecos
+        session.execute("UPDATE usuario SET enderecos = %s WHERE id = %s", (enderecos, usuario_id))
 
-    update_query = f"UPDATE usuario SET novosValores = {novosValores} WHERE email = '{email}'"
-    session.execute(update_query)
 
 def adicionarFavoritos(email):
+    query_busca_id = f"SELECT id FROM usuario WHERE email = '{email}'  ALLOW FILTERING"
+    result = session.execute(query_busca_id)
+    usuario_id = result.one()[0] 
     favoritos = []
     usu = visualizarUsuario(email)
     try:
@@ -169,14 +175,16 @@ def adicionarFavoritos(email):
         listarNomesProdutos()
         favorito = input("Digite o nome do produto que deseja favoritar: ")
         produtoFavoritado = visualizarProduto(favorito)
-        favorito = {"_id": produtoFavoritado["_id"], "nome_favorito": produtoFavoritado["nome"], "preco": produtoFavoritado["preco"]}
+        favorito = {"id": str(produtoFavoritado.id), "nome_favorito": str(produtoFavoritado.nome), "preco": str(produtoFavoritado.preco)}
         favoritos.append(favorito)
         desejo = input("Deseja adicionar outro produto em favoritos? S/N ")
-    novoValor = {"favoritos": favoritos}
 
-    update_query = f"UPDATE usuario SET novoValor = {novoValor} WHERE email = '{email}'"
+    update_query = f"UPDATE usuario SET favoritos = {favoritos} WHERE id = {usuario_id}"
     session.execute(update_query)
 
 def deletarUsuario(email):
-    delete_query = f"DELETE FROM usuario WHERE email = '{email}'"
-    session.execute(delete_query)
+    query_busca_id = f"SELECT id FROM usuario WHERE email = '{email}'  ALLOW FILTERING"
+    result = session.execute(query_busca_id)
+    usuario_id = result.one()[0]  
+    query_exclusao = f"DELETE FROM usuario WHERE id = {usuario_id}"
+    session.execute(query_exclusao)
