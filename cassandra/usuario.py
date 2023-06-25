@@ -83,10 +83,11 @@ def selecionarUsuario(usuario):
     favoritos = usuario.favoritos
     if favoritos:
         for favorito in favoritos:
+            idFavorito = favorito['id']
             nome = favorito['nome_favorito']
             preco = favorito['preco']
             preco_arredondado = "{:.2f}".format(round(float(preco), 2))
-            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco_arredondado}", end='')
+            print(f"\nFAVORITO: ID favorito: {idFavorito}  Nome: {nome}  Preço: R${preco_arredondado}", end='')
 
 def inserirUsuario():
     nome = input("Digite o nome completo do usuário: ")
