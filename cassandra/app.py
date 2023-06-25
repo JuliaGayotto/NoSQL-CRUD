@@ -23,7 +23,7 @@ session.set_keyspace('mercadolivre')
 session.execute("CREATE TABLE IF NOT EXISTS vendedor (id UUID PRIMARY KEY, email text, nome_vendedor text, cpf text)")
 session.execute("CREATE TABLE IF NOT EXISTS usuario (id UUID PRIMARY KEY, nome TEXT, email TEXT, cpf TEXT, enderecos LIST<FROZEN<MAP<TEXT, TEXT>>>, favoritos LIST<FROZEN<MAP<TEXT, TEXT>>>)")
 session.execute("CREATE TABLE IF NOT EXISTS produto (id UUID PRIMARY KEY, nome TEXT, preco FLOAT, quantidade INT, vendedor MAP<TEXT, TEXT>)")
-session.execute("CREATE TABLE IF NOT EXISTS compra (id UUID PRIMARY KEY, data_compra TEXT, usuario MAP<TEXT, TEXT>, produtos LIST<FROZEN<MAP<TEXT, TEXT>>>, vendedor MAP<TEXT, TEXT>)")
+session.execute("CREATE TABLE IF NOT EXISTS compra (id UUID PRIMARY KEY, data_compra TEXT, produtos LIST<FROZEN<MAP<TEXT, TEXT>>>, vendedor FROZEN<MAP<TEXT, TEXT>>, usuario FROZEN<MAP<TEXT, TEXT>>)")
 
 
 def menuPrincipal():

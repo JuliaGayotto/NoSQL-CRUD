@@ -53,16 +53,17 @@ def menuCompra():
 
 
 def selecionarCompra(compra):
-    print(f"\nId da compra: {compra.get('id')}")
-    print(f"Data da Compra: {compra.get('data_compra')}")
-    usuario = compra.get("usuario")
-    print(f"Usuário:  Nome: {usuario.get('nome')}  Email: {usuario.get('email')}  CPF: {usuario.get('cpf')}")
-    vendedor = compra.get("vendedor")
-    print(f"Vendedor:  Nome: {vendedor.get('nome_vendedor')}  Email: {vendedor.get('email')}  CPF: {vendedor.get('cpf')}")
-    produtos = compra.get('produtos')
-
+    print(f"\nId da compra: {compra.id}")
+    print(f"Data da Compra: {compra.data_compra}")
+    usuario = compra.usuario
+    print(f"Usuário:  Nome: {usuario['nome']}  Email: {usuario['email']}  CPF: {usuario['cpf']}")
+    vendedor = compra.vendedor
+    print(f"Vendedor:  Nome: {vendedor['nome_vendedor']}  Email: {vendedor['email']}  CPF: {vendedor['cpf']}")
+    produtos = compra.produtos
     for produto in produtos:
-        print(f"Produto:  Nome: {produto.get('nome')}\nPreço: {produto.get('preco')}\nQuantidade comprada: {produto.get('quant_comprada')}")
+        preco = produto['preco']
+        preco_arredondado = "{:.2f}".format(round(float(preco), 2))
+        print(f"Produto:  Nome: {produto['nome']} \nPreço: R$ {preco_arredondado} \nQuantidade comprada: {produto['quant_comprada']}")
 
 
 def inserirCompra():
@@ -74,9 +75,9 @@ def inserirCompra():
 
     while desejo != "N":
         nomeProduto = input("Digite o nome do produto: ")
-        quant = int(input("Digite a quantidade comprada: "))
+        quant = input("Digite a quantidade comprada: ")
         prod = visualizarProduto(nomeProduto)
-        produto = {"id": prod.get('id'), "nome": prod.get('nome'), "preco": prod.get('preco'), "quant_comprada": quant}
+        produto = {"id": str(prod.id), "nome": prod.nome, "preco": str(prod.preco), "quant_comprada": quant}
         produtos.append(produto)
         desejo = input("Deseja adicionar outro produto à compra? S/N ")
 
@@ -84,14 +85,14 @@ def inserirCompra():
         listarEmailsVendedores()
         emailVendedor = input("Digite o email do vendedor: ")
         vend = visualizarVendedor(emailVendedor)
-        vendedor = {"nome_vendedor": vend.get('nome_vendedor'), "email": vend.get('email'), "cpf": vend.get('cpf')}
+        vendedor = {"id": str(vend['id']), "nome_vendedor": vend['nome_vendedor'] , "email": vend['email'], "cpf": vend['cpf']}
         print("EMAIL USUÁRIOS:")
         listarEmailsUsuarios()
         emailUsuario = input("Digite o email do usuário: ")
         usu = visualizarUsuario(emailUsuario)
-        usuario = {"nome": usu.get('nome'), "email": usu.get('email'), "cpf": usu.get('cpf')}
+        usuario = {"id": str(usu.id), "nome": usu.nome, "email": usu.email, "cpf": usu.cpf}
 
-        query = f"INSERT INTO compra (data_compra, usuario, produtos, vendedor) VALUES ('{dataCompra}', {usuario}, {produtos}, {vendedor})"
+        query = f"INSERT INTO compra (id, data_compra, produtos, vendedor, usuario) VALUES ({uuid.uuid4()},'{dataCompra}', {produtos}, {vendedor}, {usuario})"
         session.execute(query)
 
 
@@ -106,5 +107,5 @@ def visualizarCompra(id):
     return rows.one()
 
 def deletarCompra(id):
-    query = f"DELETE FROM compra WHERE id = {id} ALLOW FILTERING"
+    query = f"DELETE FROM compra WHERE id = {id}"
     session.execute(query)

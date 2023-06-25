@@ -176,7 +176,7 @@ def adicionarFavoritos(email):
         listarNomesProdutos()
         favorito = input("Digite o nome do produto que deseja favoritar: ")
         produtoFavoritado = visualizarProduto(favorito)
-        favorito = {"id": str(produtoFavoritado.id), "nome_favorito": str(produtoFavoritado.nome), "preco": str(produtoFavoritado.preco)}
+        favorito = {"id": str(produtoFavoritado.id), "nome_favorito": produtoFavoritado.nome, "preco": str(produtoFavoritado.preco)}
         favoritos.append(favorito)
         desejo = input("Deseja adicionar outro produto em favoritos? S/N ")
 
