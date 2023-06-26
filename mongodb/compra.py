@@ -52,11 +52,8 @@ def selecionarCompra(compra):
     vendedor = compra.get("vendedor")
     print(f"Vendedor:  Nome: {vendedor.get('nome_vendedor')}  Email: {vendedor.get('email')}  CPF: {vendedor.get('cpf')}")
     produtos = compra.get('produtos')
-    # if len(produtos) > 1:
     for produto in produtos:
         print(f"Produto:  Nome: {produto.get('nome')}\nPreço: {produto.get('preco')}\nQuantidade comprada: {produto.get('quant_comprada')}")
-# else:
-        # print(f"Produto:  Nome: {produto.get('nome')}\nPreço: {produto.get('preco')}\nQuantidade comprada: {produto.get('quant_comprada')}")
 
 
 def inserirCompra():
