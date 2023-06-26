@@ -1,7 +1,8 @@
+import json
 from neo4j import GraphDatabase
 from produto import visualizarProdutos, visualizarProduto, listarNomesProdutos
 
-driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "password"))
+driver = GraphDatabase.driver("neo4j+ssc://16df7b0f.databases.neo4j.io", auth=("neo4j", "v4MKtvAydl1gg6a9yuXTcYJGToPJ_rJVVNs0O8fZ6Hw"))
 
 def menuUsuario():
     print("\n\nUSUÁRIOS")
@@ -58,116 +59,73 @@ def listarEmailsUsuarios():
             print(record["u.email"])
 
 
-
 def selecionarUsuario(usuario):
-    print(f"\n\nNome: {usuario['nome']} \nEmail: {usuario['email']} \nCPF: {usuario['cpf']}", end='')
-    enderecos = usuario.get("enderecos", [])
-    for endereco in enderecos:
-        cep = endereco["cep"]
-        numero = endereco["numero"]
-        complemento = endereco["complemento"]
-        print(f"\nENDEREÇO: \nCEP: {cep}  Número: {numero} ", end='')
-        if complemento:
-            print(f"Complemento: {complemento}", end='')
-    favoritos = usuario.get("favoritos")
-    if favoritos:
-        for favorito in favoritos:
-            nome = favorito["nome_favorito"]
-            preco = favorito["preco"]
-            print(f"\nFAVORITO: Nome: {nome}  Preço: R${preco}", end='')
+    print(f"\n\nNome: {usuario['nome']} \nEmail: {usuario['email']} \nCPF: {usuario['cpf']}")
+    print(f"CEP: {usuario['cep']} Numero: {usuario['num']} Complemento: {usuario['complemento']}")
+    if usuario['nome_favorito']  != None:
+        print(f"\nFAVORITO: Nome: {usuario['nome_favorito']}  Preço: R${usuario['preco']}")
+
 
 def inserirUsuario():
     nome = input("Digite o nome completo do usuário: ")
     email = input("Digite o email: ")
     cpf = input("Digite o CPF: ")
-    enderecos = []
-    repetir = 'S'
-
-    while repetir != "N":
-        cep = input("Digite o CEP: ")
-        num = int(input("Digite o número: "))
-        desejo = input("Deseja adicionar um complemento? S/N ")
-        if desejo == "S":
-            complemento = input("Digite o complemento: ")
-        else:
-            complemento = ''
-        end = {"cep": cep, "numero": num, "complemento": complemento}
-        enderecos.append(end)
-        repetir = input("Digitar outro endereço (S/N)? ")
+    cep = input("Digite o CEP: ")
+    num = input("Digite o número: ")
+    desejo = input("Deseja adicionar um complemento? S/N ")
+    if desejo == "S":
+        complemento = input("Digite o complemento: ")
+    else:
+        complemento = ''
 
     with driver.session() as session:
-        session.run(
-            """
-            CREATE (usuario:Usuario {nome: $nome, email: $email, cpf: $cpf, enderecos: $enderecos})
-            """,
-            nome=nome,
-            email=email,
-            cpf=cpf,
-            enderecos=enderecos
-        )
+        session.run("CREATE (u:Usuario {nome: $nome, email: $email, cpf: $cpf, cep: $cep, num: $num, complemento: $complemento})",
+        nome=nome, email=email, cpf=cpf, cep=cep, num=num, complemento=complemento)
+
 
 def visualizarUsuarios():
     with driver.session() as session:
-        result = session.run("MATCH (usuario:Usuario) RETURN usuario")
-        return result.records()
+        result = session.run("MATCH (u:Usuario) RETURN u.nome AS nome, u.email AS email, u.cpf AS cpf, u.cep AS cep, u.num AS num, u.complemento AS complemento, u.nome_favorito AS nome_favorito, u.preco AS preco")
+        return result.data()
+
 
 def visualizarUsuario(email):
     with driver.session() as session:
-        result = session.run("MATCH (usuario:Usuario {email: $email}) RETURN usuario", email=email)
-        record = result.single()
-        if record:
-            return record["usuario"]
-        else:
-            return None
+        result = session.run("MATCH (u:Usuario {email: $email}) RETURN u", email=email)
+        return result.single()[0]
+        
 
 def atualizarUsuario(email):
-    novosValores = {}
-    desejo = input("Deseja atualizar o nome? S/N ")
-    if desejo == "S":
-        novoNome = input("\nDigite o novo nome do usuário: ")
-        novosValores["nome"] = novoNome
-    desejo = input("Deseja atualizar o email? S/N ")
-    if desejo == "S":
-        novoEmail = input("Digite o novo email: ")
-        novosValores["email"] = novoEmail
-    desejo = input("Deseja atualizar o CPF? S/N ")
-    if desejo == "S":
-        novoCpf = input("Digite o novo CPF: ")
-        novosValores["cpf"] = novoCpf
-
     with driver.session() as session:
-        result = session.run(
-            "MATCH (u:Usuario {email: $email}) "
-            "SET u += $novosValores "
-            "RETURN u",
-            email=email,
-            novosValores=novosValores
-        )
-        return result.single()
+        novosValores = {}
+        desejo = input("Deseja atualizar o nome? S/N ")
+        if desejo == "S":
+            novoNome = input("\nDigite o novo nome do usuário: ")
+            novosValores["nome"] = novoNome
+        desejo = input("Deseja atualizar o email? S/N ")
+        if desejo == "S":
+            novoEmail = input("Digite o novo email: ")
+            novosValores["email"] = novoEmail
+        desejo = input("Deseja atualizar o CPF? S/N ")
+        if desejo == "S":
+            novoCpf = input("Digite o novo CPF: ")
+            novosValores["cpf"] = novoCpf
+        session.run("MATCH (u:Usuario {email: $email}) SET u += $novosValores", email=email, novosValores=novosValores)
+
 
 def adicionarFavoritos(email):
-    favoritos = []
-    desejo = "S"
-    while desejo != "N":
-        print("PRODUTOS")
-        listarNomesProdutos()
-        favorito = input("Digite o nome do produto que deseja favoritar: ")
-        produtoFavoritado = visualizarProduto(favorito)
-        favorito = {
-            "_id": str(uuid.uuid4()),
-            "nome_favorito": produtoFavoritado["nome"],
-            "preco": produtoFavoritado["preco"]
-        }
-        favoritos.append(favorito)
-        desejo = input("Deseja adicionar outro produto em favoritos? S/N ")
+    favoritos = {}
+    print("PRODUTOS")
+    listarNomesProdutos()
+    favorito = input("Digite o nome do produto que deseja favoritar: ")
+    produtoFavoritado = visualizarProduto(favorito)
+    nome_favorito =  produtoFavoritado["nome"],
+    favoritos['nome_favorito'] = nome_favorito
+    preco= produtoFavoritado["preco"]
+    favoritos['preco'] = preco
 
     with driver.session() as session:
-        session.run(
-            "MATCH (u:Usuario {email: $email}) "
-            "SET u.favoritos = $favoritos",
-            email=email,
-            favoritos=favoritos
-        )
+        session.run("MATCH (u:Usuario {email: $email}) SET  u += $favoritos", email=email, favoritos=favoritos)
 
 def deletarUsuario(email):
     with driver.session() as session:

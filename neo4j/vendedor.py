@@ -91,15 +91,10 @@ def atualizarVendedor(email):
         session.run("MATCH (v:Vendedor {email: $email}) SET v += $novosValores", email=email, novosValores=novosValores)
 
 
-def adicionarProdutosVendedor(email, mydict):
-    with driver.session() as session:
-        vend = visualizarVendedor(email)
-        produtos = vend.get("produtos", [])
-        produtos.append(mydict)
-        session.run("MATCH (v:Vendedor {email: $email}) SET v.produtos = $produtos", email=email, produtos=produtos)
-
-
 def deletarVendedor(email):
     with driver.session() as session:
-        session.run("MATCH (v:Vendedor {email: $email}) DELETE v", email=email)
-     
+        session.run(
+            "MATCH (v:Vendedor {email: $email}) "
+            "DELETE v",
+            email=email
+        )

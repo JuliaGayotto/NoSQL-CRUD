@@ -1,7 +1,7 @@
 from neo4j import GraphDatabase
-from vendedor import visualizarVendedor, listarEmailsVendedores, adicionarProdutosVendedor
+from vendedor import visualizarVendedor, listarEmailsVendedores
 
-driver = neo4j.GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "password"))
+driver = GraphDatabase.driver("neo4j+ssc://16df7b0f.databases.neo4j.io", auth=("neo4j", "v4MKtvAydl1gg6a9yuXTcYJGToPJ_rJVVNs0O8fZ6Hw"))
 
 def menuProduto():
     print("\nPRODUTOS")
@@ -10,7 +10,7 @@ def menuProduto():
     acao = int(input("Escolha uma acao: "))
     opcoes = [0, 1, 2, 3, 4, 5]
     while acao not in opcoes:
-    acao = int(input("Digite o número de uma ação válida: "))
+        acao = int(input("Digite o número de uma ação válida: "))
     if acao == 1:
         print("\nCADASTRO")
         listarEmailsVendedores()
@@ -21,14 +21,15 @@ def menuProduto():
         print("\nPRODUTOS")
         produtos = visualizarProdutos()
         for produto in produtos:
-            print(f"\nNome: {produto['nome']} \nPreço: {produto['preco']} \nQuantidade: {produto['quant_produto']} \nVendedor: {produto['vendedor']['nome_vendedor']}")
+            print(f"\nNome: {produto['nome']} \nPreço: R$ {produto['preco']} \nQuantidade: {produto['quantidade']} \nVendedor: {produto['nome_vendedor']}")
     elif acao == 3:
         print("\nPRODUTOS:")
         listarNomesProdutos()
         nome = input("\nDigite o nome do produto que deseja visualizar: ")
         produto = visualizarProduto(nome)
+        print(produto)
         print("\nPRODUTO ESCOLHIDO")
-        print(f"\nNome: {produto['nome']} \nPreço: {produto['preco']} \nQuantidade: {produto['quant_produto']}")
+        print(f"\nNome: {produto.get('nome')} \nPreço: R$ {produto.get('preco')} \nQuantidade: {produto.get('quantidade')} \nVendedor: {produto.get('nome_vendedor')}")
     elif acao == 4:
         print("\nATUALIZAR \nPRODUTOS:")
         listarNomesProdutos()
@@ -52,44 +53,35 @@ def listarNomesProdutos():
         query = "MATCH (p:Produto) RETURN p.nome AS nome"
         result = session.run(query)
         for record in result:
-        print(record["nome"])
-
+            print(record["nome"])
 
 
 def inserirProduto(email):
     with driver.session() as session:
         vend = visualizarVendedor(email)
-        vendedor = {"id": vend.get('_id'), "nome_vendedor": vend.get('nome_vendedor'), "email": vend.get('email'), "cpf": vend.get('cpf')}
+        vendedor = {"id": vend.get('_id'), "nome": vend.get('nome'), "email": vend.get('email'), "cpf": vend.get('cpf')}
         nome = input("Digite o nome do produto: ")
         preco = float(input("Digite o preço (XX.XX): R$ "))
         quant_produto = int(input("Digite a quantidade do produto: "))
         query = '''
-        MATCH (v:Vendedor)
-        WHERE v.email = $email
-        CREATE (p:Produto {nome: $nome, preco: $preco, quant_produto: $quant_produto})
-        CREATE (p)-[:PERTENCE_A]->(v)
-        RETURN p
-        '''
+        MATCH (v:Vendedor) WHERE v.email = $email CREATE (p:Produto {nome: $nome, preco: $preco, quant_produto: $quant_produto})
+        CREATE (p)-[:VENDIDO_POR]->(v) RETURN p '''
         result = session.run(query, email=email, nome=nome, preco=preco, quant_produto=quant_produto)
         return result.single()[0]
 
+
 def visualizarProdutos():
     with driver.session() as session:
-        query = '''
-        MATCH (p:Produto)-[:PERTENCE_A]->(v:Vendedor)
-        RETURN p, v
-        '''
+        query = '''MATCH (p:Produto)-[:VENDIDO_POR]->(v:Vendedor) RETURN p.nome AS nome, p.quant_produto AS quantidade, p.preco AS preco, v.nome AS nome_vendedor,
+        v.email AS email_vendedor, v.cpf AS cpf_vendedor'''
         result = session.run(query)
-        return result.records()
+        return result.data()        
+
 
 def visualizarProduto(nome):
     with driver.session() as session:
-        query = '''
-        MATCH (p:Produto {nome: $nome})-[:PERTENCE_A]->(v:Vendedor)
-        RETURN p, v
-        '''
-        result = session.run(query, nome=nome)
-        return result.single()
+        result = session.run("MATCH (p:Produto {nome: $nome})-[:VENDIDO_POR]->(v:Vendedor) RETURN p, v ", nome=nome)
+        return result.single()[0]
 
 def atualizarProduto(nome):
     with driver.session() as session:
@@ -106,18 +98,14 @@ def atualizarProduto(nome):
         if desejo == "S":
             novaQuantidade = int(input("Digite a nova quantidade: "))
             novosValores["quant_produto"] = novaQuantidade
-        query = '''
-        MATCH (p:Produto {nome: $nome})
-        SET p += $novosValores
-        RETURN p
-        '''
-        result = session.run(query, nome=nome, novosValores=novosValores)
-        return result.single()
+
+        session.run("MATCH (p:Produto {nome: $nome}) SET p += $novosValores", nome=nome, novosValores=novosValores)
+
 
 def deletarProduto(nome):
     with driver.session() as session:
-        query = '''
-        MATCH (p:Produto {nome: $nome})
-        DELETE p
-        '''
-        session.run(query, nome=nome)
+        session.run(
+            "MATCH (p:Produto {nome: $nome}) "
+            "DELETE p",
+            nome=nome
+        )
