@@ -1,7 +1,6 @@
 from neo4j import GraphDatabase
 
-uri = "bolt://localhost:7687"
-driver = GraphDatabase.driver(uri, auth=(username, password))
+driver = GraphDatabase.driver("neo4j+ssc://16df7b0f.databases.neo4j.io", auth=("neo4j", "v4MKtvAydl1gg6a9yuXTcYJGToPJ_rJVVNs0O8fZ6Hw"))
 
 def menuVendedor():
     print("\nVENDEDORES")
@@ -20,14 +19,14 @@ def menuVendedor():
         print("\nVENDEDORES")
         vendedores = visualizarVendedores()
         for vendedor in vendedores:
-            print(f"\nNome: {vendedor['nome_vendedor']} \nEmail: {vendedor['email']} \nCPF: {vendedor['cpf']}")
+                print(f"\nNome: {vendedor['nome']} \nEmail: {vendedor['email']} \nCPF: {vendedor['cpf']}")
     elif acao == 3:
         print("\nEMAILS VENDEDORES:")
         listarEmailsVendedores()
         email = input("\nDigite o email do vendedor que deseja visualizar: ")
         vendedor = visualizarVendedor(email)
         print("\nVENDEDOR ESCOLHIDO")
-        print(f"\nNome: {vendedor['nome_vendedor']} \nEmail: {vendedor['email']} \nCPF: {vendedor['cpf']}")
+        print(f"\nNome: {vendedor.get('nome')} \nEmail: {vendedor.get('email')} \nCPF: {vendedor.get('cpf')}")
     elif acao == 4:
         print("\nATUALIZAR \nEMAILS VENDEDORES:")
         listarEmailsVendedores()
@@ -59,17 +58,20 @@ def inserirVendedor():
         nome = input("Digite o nome completo do vendedor: ")
         email = input("Digite o email: ")
         cpf = input("Digite o CPF: ")
-        session.run("CREATE (v:Vendedor {nome_vendedor: $nome, email: $email, cpf: $cpf})", nome=nome, email=email, cpf=cpf)
+        session.run("CREATE (v:Vendedor {nome: $nome, email: $email, cpf: $cpf})", nome=nome, email=email, cpf=cpf)
+
 
 def visualizarVendedores():
     with driver.session() as session:
-        result = session.run("MATCH (v:Vendedor) RETURN v")
-        return result.values()
+        result = session.run("MATCH (v:Vendedor) RETURN v.nome AS nome, v.email AS email, v.cpf AS cpf")
+        return  result.data()
+
 
 def visualizarVendedor(email):
     with driver.session() as session:
         result = session.run("MATCH (v:Vendedor {email: $email}) RETURN v", email=email)
         return result.single()[0]
+
 
 def atualizarVendedor(email):
     with driver.session() as session:
@@ -77,7 +79,7 @@ def atualizarVendedor(email):
         desejo = input("Deseja atualizar o nome? S/N ")
         if desejo == "S":
             novoNome = input("\nDigite o novo nome do vendedor: ")
-            novosValores["nome_vendedor"] = novoNome
+            novosValores["nome"] = novoNome
         desejo = input("Deseja atualizar o email? S/N ")
         if desejo == "S":
             novoEmail = input("Digite o novo email: ")
@@ -88,6 +90,7 @@ def atualizarVendedor(email):
             novosValores["cpf"] = novoCpf
         session.run("MATCH (v:Vendedor {email: $email}) SET v += $novosValores", email=email, novosValores=novosValores)
 
+
 def adicionarProdutosVendedor(email, mydict):
     with driver.session() as session:
         vend = visualizarVendedor(email)
@@ -95,6 +98,8 @@ def adicionarProdutosVendedor(email, mydict):
         produtos.append(mydict)
         session.run("MATCH (v:Vendedor {email: $email}) SET v.produtos = $produtos", email=email, produtos=produtos)
 
+
 def deletarVendedor(email):
     with driver.session() as session:
         session.run("MATCH (v:Vendedor {email: $email}) DELETE v", email=email)
+     
