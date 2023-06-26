@@ -27,10 +27,10 @@ def menu():
             atualizarEmailUsuario()
             menu()
         case 2: 
-            menuProduto()
+            atualizarPrecoProduto()
             menu()
         case 3:
-            menuVendedor()
+            atualizarNomeVendedor()
             menu()
         case 0:
             print("Até mais!")
@@ -56,13 +56,13 @@ def atualizarEmailUsuario():
     print("Dados enviados para o redis com sucesso!")
 
     email = input(f"\nDigite o novo email de {nome}: ")
-    print("Atualizando novo email no redis...")
+    print("\nAtualizando novo email no redis...")
     client_redis.set('usuario:' + nome, email)
     print("Novo email atualizado no redis com sucesso!")
     novo_email = client_redis.get('usuario:' + nome)
-    print(f'Email antigo: {emailAntigo} \nEmail novo: {novo_email}')
+    print(f'Email antigo: {emailAntigo} \nEmail novo: {novo_email.decode()}')
 
-    print("Atualizando alteração no mongo...")
+    print("\nAtualizando alteração no mongo...")
     mycol.update_one(myquery, {"$set": {
         "email": novo_email.decode()
     }}, upsert=True)
@@ -87,17 +87,17 @@ def atualizarPrecoProduto():
     precoAntigo = produto.get('preco')
 
     print("\nEnviando os dados atuais para o redis...")
-    client_redis.set('produto:' + nome, preco)
+    client_redis.set('produto:' + nome, precoAntigo)
     print("Dados enviados para o redis com sucesso!")
 
     preco = input(f"\nDigite o novo preço de {nome}: ")
-    print("Atualizando novo preco no redis...")
+    print("\nAtualizando novo preco no redis...")
     client_redis.set('produto:' + nome, preco)
     print("Novo preco atualizado no redis com sucesso!")
     novo_preco = client_redis.get('produto:' + nome)
-    print(f'Preco antigo: {precoAntigo} \nPreco novo: {novo_preco}')
+    print(f'Preco antigo: {precoAntigo} \nPreco novo: {novo_preco.decode()}')
 
-    print("Atualizando alteração no mongo...")
+    print("\nAtualizando alteração no mongo...")
     mycol.update_one(myquery, {"$set": {
         "preco": novo_preco.decode()
     }}, upsert=True)
@@ -113,33 +113,33 @@ def atualizarNomeVendedor():
     print("VENDEDORES")
     listarEmailsVendedores()
     email = input("\nDigite o email do vendedor que deseja atualizar o nome: ")
-    mycol = mydb.usuario
+    mycol = mydb.vendedor
     myquery = {"email": email}
     vendedor = mycol.find_one(myquery)
 
     print("Dados atuais no mongo...")
     selecionarVendedor(vendedor)
-    nomeAntigo = vendedor.get('nome')
+    nomeAntigo = vendedor.get('nome_vendedor')
 
     print("\nEnviando os dados atuais para o redis...")
     client_redis.set('vendedor:' + email, nomeAntigo)
     print("Dados enviados para o redis com sucesso!")
 
     nome = input(f"\nDigite o nome atualizado de {email}: ")
-    print("Atualizando novo nome no redis...")
+    print("\nAtualizando novo nome no redis...")
     client_redis.set('vendedor:' + email, nome)
     print("Nome atualizado no redis com sucesso!")
     nomeAtualizado = client_redis.get('vendedor:' + email)
-    print(f'Nome antigo: {nomeAntigo} \nNome atualizado: {nomeAtualizado}')
+    print(f'Nome antigo: {nomeAntigo} \nNome atualizado: {nomeAtualizado.decode()}')
 
-    print("Atualizando alteração no mongo...")
+    print("\nAtualizando alteração no mongo...")
     mycol.update_one(myquery, {"$set": {
         "nome_vendedor": nomeAtualizado.decode()
     }}, upsert=True)
     print("Alteração atualizada no mongo!")
 
     vendedor2 = visualizarVendedor(email)
-    nomeVendedor = usuario2.get('nome')
+    nomeVendedor = vendedor2.get('nome_vendedor')
     print(f'Nome de {email} atualizado com sucesso!')
     print(f'Nome antigo: {nomeAntigo} \nNome atualizado: {nomeVendedor}')
 
@@ -203,6 +203,9 @@ def visualizarVendedor(email):
     mycol = mydb.vendedor
     myquery = { "email": email }
     return mycol.find_one(myquery)
+
+def selecionarVendedor(vendedor):
+    print(f"\nNome: {vendedor.get('nome_vendedor')} \nEmail: {vendedor.get('email')}")  
 
 
 menu()
